@@ -3,6 +3,8 @@ import UserRepository from '../repositories/user.repository';
 
 const UserController = {
   retrieveAllUsers: async (req: Request, res: Response) => {
+    console.log("in controller");
+    
     try {
       const users = await UserRepository.retrieveAllUsers();
       res.status(200).json(users);
