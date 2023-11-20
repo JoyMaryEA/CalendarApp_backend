@@ -129,6 +129,31 @@ class UserRepository {
         });
     });
   }
+
+  static updateLeaveDays(daysOff:DaysOff){
+    const query = `UPDATE user_days_off SET start_date=? , end_date=? WHERE period_id ='${daysOff.period_id}'`
+
+    return new Promise<void>((resolve, reject) => {
+      pool.getConnection()
+        .then((connection) => {
+          connection.query(query,[daysOff.start_date,daysOff.end_date])
+            .then(() => {
+              connection.release();
+              resolve();
+              
+            })
+            .catch((queryError) => {
+              connection.release();
+              reject(queryError);
+              console.log(queryError);
+              
+            });
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
 }
 
 export default UserRepository

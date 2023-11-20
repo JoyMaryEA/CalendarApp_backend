@@ -7,5 +7,6 @@ import UserController from "../controllers/user.controller";
     userRoutes.get("/users", UserController.retrieveAllUsers);
     userRoutes.post('/register', UserController.addUser);
     userRoutes.post('/login', UserController.userLogin);
-    userRoutes.post("/users/:u_id",UserController.addLeaveDays)
+    userRoutes.post("/users/:u_id",UserController.addLeaveDays);
+    userRoutes.put("/users/:period_id",UserController.updateLeaveDays);
 export default userRoutes

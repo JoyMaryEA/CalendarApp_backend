@@ -70,11 +70,30 @@ const UserController = {
        //check that input type is Date
        else {
       const success = await UserRepository.addLeaveDays(newDays);
-      res.status(201).json({OK: 'leave days entered successfully',success});
+      res.status(201).json({OK: 'leave days entered successfully',newDays});
        }
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'An error occurred while inserting user leave days' });
+    }
+  },
+  
+  updateLeaveDays: async (req: Request<{period_id:string}>, res: Response) => {   
+    try {
+      
+      let newDays:DaysOff = req.body
+      newDays.period_id =req.params.period_id as string
+       if (!(newDays.period_id && newDays.start_date && newDays.end_date)){
+        res.status(400).json({error:'Fields must not be empty'})
+       }
+       //check that input type is Date
+       else {
+      const success = await UserRepository.updateLeaveDays(newDays);
+      res.status(201).json({OK: 'leave days updated successfully', newDays});
+       }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'An error occurred while updating user leave days' });
     }
   },
 };
