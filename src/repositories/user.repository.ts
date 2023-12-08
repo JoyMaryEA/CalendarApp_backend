@@ -1,4 +1,4 @@
-import User, { DaysOff,  UserLogin } from '../Interfaces';
+import User, { DaysOff,  Success,  UserLogin } from '../Interfaces';
 import pool from '../db';
 
 class UserRepository {
@@ -12,7 +12,7 @@ class UserRepository {
             .then((results:UserLogin[] |any ) => {   //fix the any
               connection.release();
               resolve(results);
-              console.log(results);
+             // console.log(results);
               
             })
             .catch((queryError) => {
@@ -38,7 +38,7 @@ class UserRepository {
             .then(([results]: [User[],any]) => {   //fix the any
               connection.release();
               resolve(results);
-              console.log(results);
+            //  console.log(results);
               
             })
             .catch((queryError) => {
@@ -64,7 +64,7 @@ class UserRepository {
             .then(([oldUser]: [User[], any]) => {    //fix the any
               connection.release();
               resolve(oldUser);
-              console.log(oldUser);
+             // console.log(oldUser);
               
             })
             .catch((queryError) => {
@@ -131,12 +131,12 @@ class UserRepository {
   }
 
   static updateLeaveDays(daysOff:DaysOff){
-    const query = `UPDATE user_days_off SET start_date=? , end_date=? WHERE period_id ='${daysOff.period_id}'`
+    const query = `UPDATE user_days_off SET start_date=? , end_date=? WHERE period_id =?`
 
     return new Promise<void>((resolve, reject) => {
       pool.getConnection()
         .then((connection) => {
-          connection.query(query,[daysOff.start_date,daysOff.end_date])
+          connection.query(query,[daysOff.start_date,daysOff.end_date,daysOff.period_id])
             .then(() => {
               connection.release();
               resolve();
@@ -154,6 +154,54 @@ class UserRepository {
         });
     });
   }
-}
 
+static deleteLeaveDays(period_id:string){
+  const query = `DELETE FROM user_days_off WHERE period_id =?`
+
+  return new Promise<void>((resolve, reject) => {
+    pool.getConnection()
+      .then((connection) => {
+        connection.query(query,[period_id])
+          .then(() => {
+            connection.release();
+            resolve();
+            
+          })
+          .catch((queryError) => {
+            connection.release();
+            reject(queryError);
+            console.log(queryError);
+            
+          });
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+}
+static getPeriod(period_id:string):Promise<Success[]>{
+  const query = `SELECT period_id FROM user_days_off WHERE period_id =?`
+
+  return new Promise<Success[]>((resolve, reject) => {
+    pool.getConnection()
+      .then((connection) => {
+        connection.query<Success[]>(query,[period_id])
+          .then(([success]:[Success[], any]) => {
+            connection.release();
+            resolve(success);
+            
+          })
+          .catch((queryError) => {
+            connection.release();
+            reject(queryError);
+            console.log(queryError);
+            
+          });
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+}
+}
 export default UserRepository
