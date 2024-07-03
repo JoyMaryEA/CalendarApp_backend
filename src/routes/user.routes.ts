@@ -6,6 +6,7 @@ import { verifyToken } from "../middleware/verifytoken";
  const userRoutes = Router();
      
     userRoutes.get("/users",verifyToken, UserController.retrieveAllUsers);
+    userRoutes.get("/users/days",verifyToken, UserController.retrieveAllUsersDays);
     userRoutes.post('/register', UserController.addUser);
     userRoutes.post('/login', UserController.userLogin);
     userRoutes.post("/users",verifyToken,UserController.addLeaveDays);

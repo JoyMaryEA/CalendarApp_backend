@@ -12,7 +12,7 @@ class UserRepository {
             .then((results:UserLogin[] |any ) => {   //fix the any
               connection.release();
               resolve(results);
-             // console.log(results);
+             // console.log(results);//
               
             })
             .catch((queryError) => {
@@ -27,9 +27,36 @@ class UserRepository {
         });
       })
   }
-  // gets all users plus their leave days NB only users with leave days
+  // gets all users plus their office days 
   static retrieveAllUsers(): Promise<User[]> {
-    const query = "SELECT * FROM user_info ui JOIN user_days_off udo ON ui.u_id=udo.u_id";
+    const query = "SELECT * FROM user_info ";
+    
+    return new Promise((resolve, reject) => {
+      pool.getConnection()
+        .then((connection) => {
+          connection.query<User[]>(query)
+            .then(([results]: [User[],any]) => {   //fix the any
+              connection.release();
+              resolve(results);
+            //  console.log(results);
+              
+            })
+            .catch((queryError) => {
+              connection.release();
+              reject(queryError);
+              console.log(queryError);
+              
+            });
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+
+   // gets all users plus their office days 
+   static retrieveAllUsersDays(): Promise<User[]> {
+    const query = "SELECT * FROM user_info ui JOIN office_days od ON ui.u_id=od.u_id";
     
     return new Promise((resolve, reject) => {
       pool.getConnection()
@@ -106,7 +133,7 @@ class UserRepository {
   }
   // adds the selected leave days range
   static addLeaveDays(daysOff:DaysOff){
-    const query = 'INSERT INTO user_days_off(period_id,u_id, start_date, end_date) VALUES (?,?,?,?)'
+    const query = 'INSERT INTO office_days(id,u_id, start_date, end_date) VALUES (?,?,?,?)'
 
     return new Promise<void>((resolve, reject) => {
       pool.getConnection()
@@ -131,7 +158,7 @@ class UserRepository {
   }
 
   static updateLeaveDays(daysOff:DaysOff){
-    const query = `UPDATE user_days_off SET start_date=? , end_date=? WHERE period_id =?`
+    const query = `UPDATE office_days SET start_date=? , end_date=? WHERE id =?`
 
     return new Promise<void>((resolve, reject) => {
       pool.getConnection()
@@ -156,7 +183,7 @@ class UserRepository {
   }
 
 static deleteLeaveDays(period_id:string){
-  const query = `DELETE FROM user_days_off WHERE period_id =?`
+  const query = `DELETE FROM office_days WHERE id =?`
 
   return new Promise<void>((resolve, reject) => {
     pool.getConnection()
@@ -180,7 +207,7 @@ static deleteLeaveDays(period_id:string){
   });
 }
 static getPeriod(period_id:string):Promise<Success[]>{
-  const query = `SELECT period_id FROM user_days_off WHERE period_id =?`
+  const query = `SELECT period_id FROM office_days WHERE id =?`
 
   return new Promise<Success[]>((resolve, reject) => {
     pool.getConnection()
