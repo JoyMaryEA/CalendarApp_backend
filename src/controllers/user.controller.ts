@@ -48,6 +48,15 @@ const UserController = {
       res.status(500).json({ error: 'An error occurred while fetching users data' });
     }
   },
+  retrieveAllUsersInToday: async (req: Request, res: Response) => {   
+    try {
+      const users = await UserRepository.retrieveAllUsersInToday();
+      res.status(200).json(users);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'An error occurred while fetching users data' });
+    }
+  },
   addUser: async (req: Request, res: Response) => {   
     try {
       
@@ -70,7 +79,7 @@ const UserController = {
     }
   },
 
-  addLeaveDays: async (req: ExtendedRequest, res: Response) => {   
+  addOfficeDays: async (req: ExtendedRequest, res: Response) => {   
     try {
       
       let newDays:DaysOff = req.body
@@ -83,12 +92,12 @@ const UserController = {
        }
        //check that input type is Date
        else {
-      const success = await UserRepository.addLeaveDays(newDays);
-      res.status(201).json({OK: 'leave days entered successfully',newDays});
+      const success = await UserRepository.addOfficeDays(newDays);
+      res.status(201).json({OK: 'office days entered successfully',newDays});
        }
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'An error occurred while inserting user leave days' });
+      res.status(500).json({ error: 'An error occurred while inserting user office days' });
     }
   },
   

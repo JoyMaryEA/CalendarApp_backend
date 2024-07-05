@@ -80,6 +80,38 @@ class UserRepository {
         });
     });
   }
+
+    // gets all users in today
+    static retrieveAllUsersInToday(): Promise<User[]> {
+      const query = `SELECT ui.*
+FROM user_info ui
+INNER JOIN office_days od ON ui.u_id = od.u_id
+WHERE
+  od.start_date <= CURDATE() AND  -- Today's date should be within or equal to start date
+  od.end_date >= CURDATE(); `;
+      
+      return new Promise((resolve, reject) => {
+        pool.getConnection()
+          .then((connection) => {
+            connection.query<User[]>(query)
+              .then(([results]: [User[],any]) => {   //fix the any
+                connection.release();
+                resolve(results);
+              //  console.log(results);
+                
+              })
+              .catch((queryError) => {
+                connection.release();
+                reject(queryError);
+                console.log(queryError);
+                
+              });
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    }
 //get user by email
   static retrieveUserByEmail(email:string): Promise<User[]> {
     const query = "SELECT * FROM user_info where email = ?";
@@ -132,7 +164,7 @@ class UserRepository {
     });
   }
   // adds the selected leave days range
-  static addLeaveDays(daysOff:DaysOff){
+  static addOfficeDays(daysOff:DaysOff){
     const query = 'INSERT INTO office_days(id,u_id, start_date, end_date) VALUES (?,?,?,?)'
 
     return new Promise<void>((resolve, reject) => {
