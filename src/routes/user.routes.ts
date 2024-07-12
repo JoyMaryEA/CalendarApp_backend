@@ -7,6 +7,7 @@ import { verifyToken } from "../middleware/verifytoken";
      
     userRoutes.get("/users",verifyToken, UserController.retrieveAllUsers);
     userRoutes.get("/users/days",verifyToken, UserController.retrieveAllUsersDays);
+    userRoutes.get("/users/days/:u_id",verifyToken, UserController.retrieveOneUserDays);
     userRoutes.get("/users/intoday",verifyToken, UserController.retrieveAllUsersInToday);
     userRoutes.post('/register', UserController.addUser);
     userRoutes.post('/login', UserController.userLogin);

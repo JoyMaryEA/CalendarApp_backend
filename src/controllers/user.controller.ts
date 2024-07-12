@@ -19,7 +19,7 @@ const UserController = {
       
       else{
         const token = jwt.sign({u_id:existingUser[0].u_id,email:existingUser[0].email},process.env.TOKEN_KEY as string)
-        res.status(200).json({success:'Successful login',token,u_id:existingUser[0].u_id})
+        res.status(200).json({success:'Successful login',token,u_id:existingUser[0].u_id,first_name:existingUser[0].first_name, last_name:existingUser[0].last_name})
       }
       
     }
@@ -33,6 +33,16 @@ const UserController = {
   retrieveAllUsers: async (req: Request, res: Response) => {   
     try {
       const users = await UserRepository.retrieveAllUsers();
+      res.status(200).json(users);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'An error occurred while fetching users data' });
+    }
+  },
+  retrieveOneUserDays: async (req: Request<{u_id:string}>, res: Response) => {   
+    var u_id:string = req.params.u_id as string
+    try {
+      const users = await UserRepository.retrieveOneUserDays(u_id);
       res.status(200).json(users);
     } catch (error) {
       console.error(error);

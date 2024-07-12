@@ -81,6 +81,33 @@ class UserRepository {
     });
   }
 
+     // gets one users plus their office days 
+     static retrieveOneUserDays(u_id:string): Promise<User[]> {
+      const query = `SELECT od.start_date, od.end_date, ui.color FROM user_info ui JOIN office_days od ON ui.u_id=od.u_id WHERE ui.u_id="${u_id}"`;
+      
+      return new Promise((resolve, reject) => {
+        pool.getConnection()
+          .then((connection) => {
+            connection.query<User[]>(query)
+              .then(([results]: [User[],any]) => {   //fix the any
+                connection.release();
+                resolve(results);
+              //  console.log(results);
+                
+              })
+              .catch((queryError) => {
+                connection.release();
+                reject(queryError);
+                console.log(queryError);
+                
+              });
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    }
+
     // gets all users in today
     static retrieveAllUsersInToday(): Promise<User[]> {
       const query = `SELECT ui.*
