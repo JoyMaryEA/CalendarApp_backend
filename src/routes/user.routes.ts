@@ -9,6 +9,7 @@ import { verifyToken } from "../middleware/verifytoken";
     userRoutes.get("/users/days",verifyToken, UserController.retrieveAllUsersDays);
     userRoutes.get("/users/days/:u_id",verifyToken, UserController.retrieveOneUserDays);
     userRoutes.get("/users/intoday",verifyToken, UserController.retrieveAllUsersInToday);
+    userRoutes.post("/users/juniors",verifyToken, UserController.retrieveAllUsersBeneathYou);
     userRoutes.post('/register', UserController.addUser);
     userRoutes.post('/login', UserController.userLogin);
     userRoutes.post("/users",verifyToken,UserController.addOfficeDays);

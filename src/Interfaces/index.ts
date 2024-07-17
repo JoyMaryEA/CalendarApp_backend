@@ -13,6 +13,8 @@ export default interface User extends RowDataPacket {
   email:string;
   password:string;
   period_id:string;
+  role:number;
+  team_id:number;
 }
 export interface UserLogin extends RowDataPacket {
   email:string;
@@ -36,4 +38,9 @@ export interface DecodedData {
 }
 export interface ExtendedRequest extends Request {
   info?: DecodedData;
+}
+
+export interface UserUnderYou extends RowDataPacket {
+  team_id:string;
+  role:string;
 }

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import UserRepository from '../repositories/user.repository'; 
 import { v4 as uuidv4 } from 'uuid';
-import User, { DaysOff, ExtendedRequest, UserLogin } from '../Interfaces';
+import User, { DaysOff, ExtendedRequest, UserLogin, UserUnderYou } from '../Interfaces';
 import jwt from "jsonwebtoken"
 import { log } from 'console';
 require('dotenv').config()
@@ -19,7 +19,7 @@ const UserController = {
       
       else{
         const token = jwt.sign({u_id:existingUser[0].u_id,email:existingUser[0].email},process.env.TOKEN_KEY as string)
-        res.status(200).json({success:'Successful login',token,u_id:existingUser[0].u_id,first_name:existingUser[0].first_name, last_name:existingUser[0].last_name})
+        res.status(200).json({success:'Successful login',token,u_id:existingUser[0].u_id,first_name:existingUser[0].first_name, last_name:existingUser[0].last_name, role:existingUser[0].role, team_id:existingUser[0].team_id})
       }
       
     }
@@ -61,6 +61,16 @@ const UserController = {
   retrieveAllUsersInToday: async (req: Request, res: Response) => {   
     try {
       const users = await UserRepository.retrieveAllUsersInToday();
+      res.status(200).json(users);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'An error occurred while fetching users data' });
+    }
+  },
+  retrieveAllUsersBeneathYou: async (req: Request, res: Response) => {   
+    const userUnderYou:UserUnderYou = req.body
+    try {
+      const users = await UserRepository.retrieveAllUsersUnderYou(parseInt(userUnderYou.team_id),parseInt(userUnderYou.role));
       res.status(200).json(users);
     } catch (error) {
       console.error(error);

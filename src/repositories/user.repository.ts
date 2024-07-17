@@ -111,16 +111,43 @@ class UserRepository {
     // gets all users in today
     static retrieveAllUsersInToday(): Promise<User[]> {
       const query = `SELECT ui.*
-FROM user_info ui
-INNER JOIN office_days od ON ui.u_id = od.u_id
-WHERE
-  od.start_date <= CURDATE() AND  -- Today's date should be within or equal to start date
-  od.end_date >= CURDATE(); `;
+                    FROM user_info ui
+                    INNER JOIN office_days od ON ui.u_id = od.u_id
+                    WHERE
+                      od.start_date <= CURDATE() AND  
+                      od.end_date >= CURDATE(); `;
       
       return new Promise((resolve, reject) => {
         pool.getConnection()
           .then((connection) => {
             connection.query<User[]>(query)
+              .then(([results]: [User[],any]) => {   //fix the any
+                connection.release();
+                resolve(results);
+              //  console.log(results);
+                
+              })
+              .catch((queryError) => {
+                connection.release();
+                reject(queryError);
+                console.log(queryError);
+                
+              });
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    }
+    
+    // gets all users beneath :) you and their office days 
+    static retrieveAllUsersUnderYou(team_id:number,role:number ): Promise<User[]> {
+      const query = `SELECT * FROM test.user_info ui JOIN test.office_days od ON ui.u_id=od.u_id WHERE team_id = ? AND role < ?; `;
+      
+      return new Promise((resolve, reject) => {
+        pool.getConnection()
+          .then((connection) => {
+            connection.query<User[]>(query,[team_id,role])
               .then(([results]: [User[],any]) => {   //fix the any
                 connection.release();
                 resolve(results);
