@@ -58,6 +58,16 @@ const UserController = {
       res.status(500).json({ error: 'An error occurred while fetching users data' });
     }
   },
+  retrieveAllUsersInTeamDays: async (req: ExtendedRequest, res: Response) => {   
+    var team_id =req.params?.team_id as string
+    try {
+      const users = await UserRepository.retrieveAllUsersInTeamDays(team_id);
+      res.status(200).json(users);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'An error occurred while fetching users data' });
+    }
+  },
   retrieveAllUsersInToday: async (req: Request, res: Response) => {   
     try {
       const users = await UserRepository.retrieveAllUsersInToday();
