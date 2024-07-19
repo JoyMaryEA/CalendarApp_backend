@@ -44,3 +44,11 @@ export interface UserUnderYou extends RowDataPacket {
   team_id:string;
   role:string;
 }
+
+export interface TeamRowMaxSeats extends RowDataPacket{
+  seats:number
+}
+
+export interface TeamRowCountSeats extends RowDataPacket{
+  count:number
+}
