@@ -1,3 +1,4 @@
+import { log } from 'console';
 import User, { DaysOff,  Success,  UserLogin } from '../Interfaces';
 import pool from '../db';
 
