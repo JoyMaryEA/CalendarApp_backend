@@ -12,8 +12,9 @@ import { verifyToken } from "../middleware/verifytoken";
     userRoutes.get("/users/intoday",verifyToken, UserController.retrieveAllUsersInToday);
     userRoutes.post("/users/juniors",verifyToken, UserController.retrieveAllUsersBeneathYou);
     userRoutes.post('/register', UserController.addUser);
+    userRoutes.put('/resetpwd', UserController.resetPassword);
     userRoutes.post('/login', UserController.userLogin);
     userRoutes.post("/users",verifyToken,UserController.addOfficeDays);
     userRoutes.patch("/users/:period_id",verifyToken,UserController.updateLeaveDays);
-    userRoutes.delete("/users/:period_id",verifyToken,UserController.deleteLeaveDays)
+    userRoutes.delete("/users/:period_id",verifyToken,UserController.deleteOfficeDay)
 export default userRoutes

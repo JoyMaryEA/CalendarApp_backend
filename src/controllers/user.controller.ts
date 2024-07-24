@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import UserRepository from '../repositories/user.repository'; 
 import { v4 as uuidv4 } from 'uuid';
 import User, { DaysOff, ExtendedRequest, UserLogin, UserUnderYou } from '../Interfaces';
-import jwt from "jsonwebtoken"
-import { log } from 'console';
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 require('dotenv').config()
 
 const UserController = {
@@ -12,14 +12,42 @@ const UserController = {
       const pair:UserLogin = req.body
       const existingUser = await UserRepository.retrieveUserByEmail(pair.email!)
    
-      
-      if ( !existingUser[0] || existingUser[0].password != pair.password){
+      let valiUser = await bcrypt.compare(pair.password, existingUser[0].password);
+  
+      if ( !existingUser[0] || !(valiUser)){
         res.status(404).json({error:"user does not exist"})
             }
       
       else{
         const token = jwt.sign({u_id:existingUser[0].u_id,email:existingUser[0].email},process.env.TOKEN_KEY as string)
         res.status(200).json({success:'Successful login',token,u_id:existingUser[0].u_id,first_name:existingUser[0].first_name, last_name:existingUser[0].last_name, role:existingUser[0].role, team_id:existingUser[0].team_id})
+      }
+      
+    }
+    catch(error) {
+      console.error(error);
+      res.status(500).json({ error: 'An error occurred while fetching users' });
+    }
+  }
+   
+  },
+  resetPassword: async (req:Request, res:Response)=>{{
+    try{
+      const pair:UserLogin = req.body
+      const existingUser = await UserRepository.retrieveUserByEmail(pair.email!)      
+            
+      if ( !existingUser[0] ){
+        res.status(404).json({error:"user does not exist"})
+      } else{
+
+        let hashedPassword = await bcrypt.hash(pair.password, 10);
+            try {
+              const users = await UserRepository.resetPassword(pair.email,hashedPassword);
+              res.status(200).json({success:"successfull password reset"});
+            } catch (error) {
+              console.error(error);
+              res.status(500).json({ error: 'password reset error' });
+            }
       }
       
     }
@@ -149,7 +177,7 @@ const UserController = {
       res.status(500).json({ error: 'An error occurred while updating user leave days' });
     }
   },
-  deleteLeaveDays: async (req: Request<{period_id:string}>, res: Response) => {   
+  deleteOfficeDay: async (req: Request<{period_id:string}>, res: Response) => {   
     try {
       
       
@@ -159,7 +187,7 @@ const UserController = {
         res.status(404).json({error:'Leave days not found'})
       }
       else{
-        const success = await UserRepository.deleteLeaveDays(period_id);
+        const success = await UserRepository.deleteOfficeDay(period_id);
         res.status(200).json({OK: 'leave days deleted successfully'});
       }
       

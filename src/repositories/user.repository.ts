@@ -1,7 +1,9 @@
 import { log } from 'console';
-import User, { DaysOff,  Success,  UserLogin } from '../Interfaces';
+import User, { DaysOff,  msg,  Success,  UserLogin } from '../Interfaces';
 import pool from '../db';
 
+
+//TODO: REFACTOR TO USE ASYNC/AWAIT
 class UserRepository {
   //simple login
   static userLogin(): Promise<UserLogin[]>{
@@ -11,6 +13,30 @@ class UserRepository {
           .then((connection)=>{
             connection.query<UserLogin[]>(query)
             .then((results:UserLogin[] |any ) => {   //fix the any
+              connection.release();
+              resolve(results);
+             // console.log(results);//
+              
+            })
+            .catch((queryError) => {
+              connection.release();
+              reject(queryError);
+              console.log(queryError);
+              
+            });
+        })
+        .catch((err) => {
+          reject(err);
+        });
+      })
+  }
+  static resetPassword(email:string, password:string): Promise<UserLogin[]>{
+    const query = 'UPDATE user_info SET password =? WHERE email=?'
+        return new Promise((resolve, reject)=>{
+          pool.getConnection()
+          .then((connection)=>{
+            connection.query<msg[]>(query,[password,email])
+            .then((results:msg |any ) => {   //fix the any
               connection.release();
               resolve(results);
              // console.log(results);//
@@ -111,7 +137,7 @@ class UserRepository {
 
      // gets one users plus their office days 
      static retrieveOneUserDays(u_id:string): Promise<User[]> {
-      const query = `SELECT od.start_date, od.end_date, ui.color FROM user_info ui JOIN office_days od ON ui.u_id=od.u_id WHERE ui.u_id="${u_id}"`;
+      const query = `SELECT od.start_date, od.end_date, ui.color, od.id FROM user_info ui JOIN office_days od ON ui.u_id=od.u_id WHERE ui.u_id="${u_id}"`;
       
       return new Promise((resolve, reject) => {
         pool.getConnection()
@@ -296,7 +322,7 @@ class UserRepository {
     });
   }
 
-static deleteLeaveDays(period_id:string){
+static deleteOfficeDay(period_id:string){
   const query = `DELETE FROM office_days WHERE id =?`
 
   return new Promise<void>((resolve, reject) => {
@@ -321,7 +347,7 @@ static deleteLeaveDays(period_id:string){
   });
 }
 static getPeriod(period_id:string):Promise<Success[]>{
-  const query = `SELECT period_id FROM office_days WHERE id =?`
+  const query = `SELECT id FROM office_days WHERE id =?`
 
   return new Promise<Success[]>((resolve, reject) => {
     pool.getConnection()

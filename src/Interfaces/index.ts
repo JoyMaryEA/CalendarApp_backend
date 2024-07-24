@@ -31,6 +31,10 @@ export interface Success extends RowDataPacket{
   message:{period_id?:string}
   
 }
+export interface msg extends RowDataPacket{
+  message:string
+  
+}
 
 export interface DecodedData {
   u_id: string;
