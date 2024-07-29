@@ -56,3 +56,8 @@ export interface TeamRowMaxSeats extends RowDataPacket{
 export interface TeamRowCountSeats extends RowDataPacket{
   count:number
 }
+export interface userBetweenDates extends RowDataPacket{
+  u_id:string,
+  start_date:string,
+  end_date:string
+}

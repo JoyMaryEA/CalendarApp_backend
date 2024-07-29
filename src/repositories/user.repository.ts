@@ -137,7 +137,7 @@ class UserRepository {
 
      // gets one users plus their office days 
      static retrieveOneUserDays(u_id:string): Promise<User[]> {
-      const query = `SELECT od.start_date, od.end_date, ui.color, od.id FROM user_info ui JOIN office_days od ON ui.u_id=od.u_id WHERE ui.u_id="${u_id}"`;
+      const query = `SELECT od.start_date, od.end_date, ui.u_id , od.id FROM user_info ui JOIN office_days od ON ui.u_id=od.u_id WHERE ui.u_id="${u_id}"`;
       
       return new Promise((resolve, reject) => {
         pool.getConnection()
@@ -162,6 +162,40 @@ class UserRepository {
       });
     }
 
+    
+     // gets one users plus their office days for a single month
+     static retrieveUserDaysBetweenDates(u_id:string,start_date:string, end_date:string): Promise<User[]> {
+      const query = ` SELECT ui.*
+                      FROM user_info ui
+                      INNER JOIN office_days od ON ui.u_id = od.u_id
+                      WHERE
+                        od.start_date <= ? AND  
+                        od.end_date >= ?  AND ui.u_id= ?;`;
+  
+                        
+      
+      return new Promise((resolve, reject) => {
+        pool.getConnection()
+          .then((connection) => {
+            connection.query<User[]>(query,[end_date,start_date,u_id])
+              .then(([results]: [User[],any]) => {   //fix the any
+                connection.release();
+                resolve(results);
+              //  console.log(results);
+                
+              })
+              .catch((queryError) => {
+                connection.release();
+                reject(queryError);
+                console.log(queryError);
+                
+              });
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    }
     // gets all users in today
     static retrieveAllUsersInToday(): Promise<User[]> {
       const query = `SELECT ui.*
@@ -194,9 +228,10 @@ class UserRepository {
       });
     }
     
+    
     // gets all users beneath :) you and their office days 
     static retrieveAllUsersUnderYou(team_id:number,role:number ): Promise<User[]> {
-      const query = `SELECT first_name, last_name, role, team_id, u_id FROM test.user_info WHERE team_id = ? AND role < ?; `;
+      const query = `SELECT * FROM user_info ui JOIN office_days od ON ui.u_id=od.u_id WHERE team_id = ? AND role < ?; `;
       
       return new Promise((resolve, reject) => {
         pool.getConnection()

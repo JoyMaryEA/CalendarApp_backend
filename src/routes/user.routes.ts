@@ -15,6 +15,7 @@ import { verifyToken } from "../middleware/verifytoken";
     userRoutes.put('/resetpwd', UserController.resetPassword);
     userRoutes.post('/login', UserController.userLogin);
     userRoutes.post("/users",verifyToken,UserController.addOfficeDays);
+    userRoutes.post("/users/period",verifyToken,UserController.retrieveUserDaysBetweenDates);
     userRoutes.patch("/users/:period_id",verifyToken,UserController.updateLeaveDays);
     userRoutes.delete("/users/:period_id",verifyToken,UserController.deleteOfficeDay)
 export default userRoutes

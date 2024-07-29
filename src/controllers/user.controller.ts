@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import UserRepository from '../repositories/user.repository'; 
 import { v4 as uuidv4 } from 'uuid';
-import User, { DaysOff, ExtendedRequest, UserLogin, UserUnderYou } from '../Interfaces';
+import User, { DaysOff, ExtendedRequest, userBetweenDates, UserLogin, UserUnderYou } from '../Interfaces';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 require('dotenv').config()
@@ -37,7 +37,7 @@ const UserController = {
       const existingUser = await UserRepository.retrieveUserByEmail(pair.email!)      
             
       if ( !existingUser[0] ){
-        res.status(404).json({error:"user does not exist"})
+        res.status(404).json({error:"User not registered "})
       } else{
 
         let hashedPassword = await bcrypt.hash(pair.password, 10);
@@ -46,14 +46,14 @@ const UserController = {
               res.status(200).json({success:"successfull password reset"});
             } catch (error) {
               console.error(error);
-              res.status(500).json({ error: 'password reset error' });
+              res.status(500).json({ error: 'Password reset error. Try again later.' });
             }
       }
       
     }
     catch(error) {
       console.error(error);
-      res.status(500).json({ error: 'An error occurred while fetching users' });
+      res.status(500).json({ error: 'An error occurred while fetching details. Try again later.' });
     }
   }
    
@@ -86,15 +86,36 @@ const UserController = {
       res.status(500).json({ error: 'An error occurred while fetching users data' });
     }
   },
-  retrieveAllUsersInTeamDays: async (req: ExtendedRequest, res: Response) => {   
-    var team_id =req.params?.team_id as string
+  retrieveUserDaysBetweenDates: async (req: Request, res: Response) => {   
+    const userBetweenDates:userBetweenDates = req.body
     try {
-      const users = await UserRepository.retrieveAllUsersInTeamDays(team_id);
+      const users = await UserRepository.retrieveUserDaysBetweenDates(userBetweenDates.u_id,userBetweenDates.start_date,userBetweenDates.end_date);
       res.status(200).json(users);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'An error occurred while fetching users data' });
     }
+  },
+  retrieveAllUsersInTeamDays: async (req: ExtendedRequest, res: Response) => {   
+    var team_id =req.params?.team_id as string
+    if (parseInt(team_id)<=4){ //manager team id is >5
+      try {
+        const users = await UserRepository.retrieveAllUsersInTeamDays(team_id);
+        res.status(200).json(users);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching users data' });
+      }
+    }else {
+      try {
+        const users = await UserRepository.retrieveAllUsersDays();
+        res.status(200).json(users);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching users data' });
+      }
+    }
+   
   },
   retrieveAllUsersInToday: async (req: Request, res: Response) => {   
     try {
@@ -107,13 +128,24 @@ const UserController = {
   },
   retrieveAllUsersBeneathYou: async (req: Request, res: Response) => {   
     const userUnderYou:UserUnderYou = req.body
-    try {
-      const users = await UserRepository.retrieveAllUsersUnderYou(parseInt(userUnderYou.team_id),parseInt(userUnderYou.role));
-      res.status(200).json(users);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'An error occurred while fetching users data' });
+    if (parseInt(userUnderYou.role)>5){
+      try {
+        const users = await UserRepository.retrieveAllUsersDays();
+        res.status(200).json(users);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching users data' });
+      }
+    }else{
+      try {
+        const users = await UserRepository.retrieveAllUsersUnderYou(parseInt(userUnderYou.team_id),parseInt(userUnderYou.role));
+        res.status(200).json(users);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching users data' });
+      }
     }
+    
   },
   addUser: async (req: Request, res: Response) => {   
     try {
