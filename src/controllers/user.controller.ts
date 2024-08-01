@@ -183,7 +183,7 @@ const UserController = {
        //check that input type is Date
        else {
       const success = await UserRepository.addOfficeDays(newDays);
-      res.status(201).json({OK: 'office days entered successfully',newDays});
+      res.status(201).json({message: 'office days recorded successfully',newDays});
        }
     } catch (error) {
       console.error(error);
@@ -220,7 +220,7 @@ const UserController = {
       }
       else{
         const success = await UserRepository.deleteOfficeDay(period_id);
-        res.status(200).json({OK: 'leave days deleted successfully'});
+        res.status(200).json({message: 'Successful delete'});
       }
       
        

@@ -1,6 +1,7 @@
 import { log } from 'console';
 import User, { DaysOff,  msg,  Success,  UserLogin } from '../Interfaces';
 import pool from '../db';
+import e from 'express';
 
 
 //TODO: REFACTOR TO USE ASYNC/AWAIT
@@ -165,19 +166,23 @@ class UserRepository {
     
      // gets one users plus their office days for a single month
      static retrieveUserDaysBetweenDates(u_id:string,start_date:string, end_date:string): Promise<User[]> {
-      const query = ` SELECT ui.*
-                      FROM user_info ui
-                      INNER JOIN office_days od ON ui.u_id = od.u_id
-                      WHERE
-                        od.start_date <= ? AND  
-                        od.end_date >= ?  AND ui.u_id= ?;`;
+     // console.log(start_date,end_date);
+      
+      const query = ` SELECT SUM(
+                        LEAST(end_date, ?) - GREATEST(start_date, ?)
+                    ) AS count
+                    FROM office_days
+                    WHERE
+                        end_date >= ? AND
+                        start_date <= ? AND
+                        u_id = ?;`;
   
                         
       
       return new Promise((resolve, reject) => {
         pool.getConnection()
           .then((connection) => {
-            connection.query<User[]>(query,[end_date,start_date,u_id])
+            connection.query<User[]>(query,[end_date,start_date,start_date,end_date,u_id])
               .then(([results]: [User[],any]) => {   //fix the any
                 connection.release();
                 resolve(results);
